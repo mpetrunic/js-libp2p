@@ -155,8 +155,10 @@ export class Circuit implements Transport, Initializable {
     try {
       const source = abortableDuplex(stream, controller.signal)
       const streamHandler = new StreamHandlerV2({ stream: { ...stream, ...source } })
-      const request = CircuitV2.HopMessage.decode(await streamHandler.read())
-
+      let request
+      try {
+        request = CircuitV2.HopMessage.decode(await streamHandler.read())
+      } catch (e) {}
       if (request?.type == null) {
         log('request was invalid, could not read from stream')
         streamHandler.write(CircuitV2.HopMessage.encode({

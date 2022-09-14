@@ -4,7 +4,9 @@ import type { PeerId } from '@libp2p/interface-peer-id'
 import { Multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { pair } from 'it-pair'
+import type { Duplex } from 'it-stream-types'
 import sinon from 'sinon'
+import type { Uint8ArrayList } from 'uint8arraylist'
 import { Circuit } from '../../../src/circuit/transport.js'
 import { handleHopProtocol } from '../../../src/circuit/v2/hop.js'
 import { HopMessage, Status, StopMessage } from '../../../src/circuit/v2/pb/index.js'
@@ -16,7 +18,7 @@ import * as peerUtils from '../../utils/creators/peer.js'
 
 describe('Circuit v2 - hop protocol', function () {
   it('error on unknow message type', async function () {
-    const streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8Array>()) })
+    const streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>) })
     await handleHopProtocol({
       connection: mockConnection(mockMultiaddrConnection(mockDuplex(), await peerUtils.createPeerId())),
       streamHandler,
@@ -36,7 +38,7 @@ describe('Circuit v2 - hop protocol', function () {
     beforeEach(async () => {
       [, relayPeer] = await peerUtils.createPeerIds(2)
       conn = await mockConnection(mockMultiaddrConnection(mockDuplex(), relayPeer))
-      streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8Array>()) })
+      streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>) })
       reservationStore = new ReservationStore()
     })
 
@@ -143,7 +145,7 @@ describe('Circuit v2 - hop protocol', function () {
     beforeEach(async () => {
       [, relayPeer, dstPeer] = await peerUtils.createPeerIds(3)
       conn = await mockConnection(mockMultiaddrConnection(mockDuplex(), relayPeer))
-      streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8Array>()) })
+      streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>) })
       reservationStore = new ReservationStore()
       circuit = new Circuit({
         enabled: true,
@@ -175,7 +177,7 @@ describe('Circuit v2 - hop protocol', function () {
         mockMultiaddrConnection(pair<Uint8Array>(), dstPeer)
       )
       const streamStub = sinon.stub(dstConn, 'newStream')
-      const dstStream = mockStream(pair<Uint8Array>())
+      const dstStream = mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>)
       streamStub.resolves(dstStream)
       const dstStreamHandler = new StreamHandlerV2({ stream: dstStream })
       dstStreamHandler.write(StopMessage.encode({

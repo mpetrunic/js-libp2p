@@ -8,6 +8,8 @@ import { Status, StopMessage } from '../../../src/circuit/v2/pb/index.js'
 import { expect } from 'aegir/chai'
 import sinon from 'sinon'
 import { mockConnection, mockMultiaddrConnection, mockStream } from '@libp2p/interface-mocks'
+import type { Uint8ArrayList } from 'uint8arraylist'
+import type { Duplex } from 'it-stream-types'
 
 /* eslint-env mocha */
 
@@ -17,7 +19,7 @@ describe('Circuit v2 - stop protocol', function () {
   beforeEach(async () => {
     [srcPeer, relayPeer] = await createPeerIds(2)
     conn = await mockConnection(mockMultiaddrConnection(pair<Uint8Array>(), relayPeer))
-    streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8Array>()) })
+    streamHandler = new StreamHandlerV2({ stream: mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>) })
   })
 
   this.afterEach(async function () {
@@ -51,7 +53,7 @@ describe('Circuit v2 - stop protocol', function () {
 
   it('send stop - success', async function () {
     const streamStub = sinon.stub(conn, 'newStream')
-    streamStub.resolves(mockStream(pair<Uint8Array>()))
+    streamStub.resolves(mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>))
     await stop({ connection: conn, request: { type: StopMessage.Type.CONNECT, peer: { id: srcPeer.toBytes(), addrs: [] } } })
     streamHandler.write(StopMessage.encode({
       type: StopMessage.Type.STATUS,
@@ -61,7 +63,7 @@ describe('Circuit v2 - stop protocol', function () {
 
   it('send stop - should not fall apart with invalid status response', async function () {
     const streamStub = sinon.stub(conn, 'newStream')
-    streamStub.resolves(mockStream(pair<Uint8Array>()))
+    streamStub.resolves(mockStream(pair<Uint8ArrayList>() as Duplex<Uint8ArrayList, Uint8ArrayList|Uint8Array>))
     await stop({ connection: conn, request: { type: StopMessage.Type.CONNECT, peer: { id: srcPeer.toBytes(), addrs: [] } } })
     streamHandler.write(new Uint8Array(10))
   })
