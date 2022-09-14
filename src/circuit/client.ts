@@ -31,6 +31,9 @@ export interface CircuitServiceEvents {
   'relay:reservation': CustomEvent
 }
 
+/**
+ * Service responsible for connecting and creating reservations on relays.
+ */
 export class CircuitService extends EventEmitter<CircuitServiceEvents> implements Startable {
   private readonly components: Components
   private readonly addressSorter: AddressSorter

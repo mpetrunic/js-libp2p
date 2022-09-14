@@ -49,6 +49,8 @@ export class Circuit implements Transport, Initializable {
 
   constructor (options: RelayConfig) {
     this._init = options
+    // TODO: We never discard expired reservations. To do that, we would need to convert
+    // ReservationStore to startable service
     this.reservationStore = new ReservationStore(options.limit)
   }
 
